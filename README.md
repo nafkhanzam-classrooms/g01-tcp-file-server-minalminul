@@ -4,8 +4,8 @@
 ## Anggota Kelompok
 | Nama           | NRP        | Kelas     |
 | ---            | ---        | ----------|
-|                |            |           |
-|                |            |           |
+| Shafira Nauraishma Zahida | 5025241235 | Program Jaringan C |
+| Najma Lail Arazy | 5025241243 | Program Jaringan C |
 
 ## Link Youtube (Unlisted)
 Link ditaruh di bawah ini
