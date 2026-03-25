@@ -19,7 +19,7 @@ Link ditaruh di bawah ini
 
 Cara Kerja:
 
-Server ini bekerja dengan model blocking, satu klien dalam satu waktu. Inti dari cara kerjanya ada di fungsi main():
+Server ini bekerja dengan model blocking, satu klien dalam satu waktu. Inti dari cara kerjanya ada di fungsi `main()`:
 
 ```
 server_sock.accept()   → menunggu klien masuk (BLOCKING)
@@ -31,15 +31,15 @@ Ketika `handle_client()` sedang berjalan, loop `main()` tidak akan kembali ke `a
 
 Fungsi-fungsi Utama:
 
-`main()` Membuat server socket, bind ke port 9090, lalu masuk ke loop `accept()` yang blocking. Setiap iterasi loop menangani tepat satu klien.
+- `main()` Membuat server socket, bind ke port 9090, lalu masuk ke loop `accept()` yang blocking. Setiap iterasi loop menangani tepat satu klien.
 
-`handle_client(conn, addr)` Loop `recv()` yang terus membaca perintah dari satu klien. Fungsi ini baru return ketika klien mengirim `exit` atau koneksi putus. Selama fungsi ini berjalan, seluruh server "terkunci" untuk klien ini.
+- `handle_client(conn, addr)` Loop `recv()` yang terus membaca perintah dari satu klien. Fungsi ini baru return ketika klien mengirim `exit` atau koneksi putus. Selama fungsi ini berjalan, seluruh server "terkunci" untuk klien ini.
 
-`handle_list(conn)` Membaca isi folder `server_files/` dengan `os.listdir()` lalu mengirimkan hasilnya sebagai string ke klien.
+- `handle_list(conn)` Membaca isi folder `server_files/` dengan `os.listdir()` lalu mengirimkan hasilnya sebagai string ke klien.
 
-`handle_upload(conn, filename)` Mengikuti protokol: kirim READY → terima 8 byte ukuran file → terima isi file dalam loop chunk → kirim OK. File disimpan ke `server_files/`.
+- `handle_upload(conn, filename)` Mengikuti protokol: kirim READY → terima 8 byte ukuran file → terima isi file dalam loop chunk → kirim OK. File disimpan ke `server_files/`.
 
-`handle_download(conn, filename)` Cek apakah file ada. Jika tidak, kirim NOTFOUND. Jika ada, kirim FOUND → kirim 8 byte ukuran → kirim isi file dalam loop chunk.
+- `handle_download(conn, filename)` Cek apakah file ada. Jika tidak, kirim NOTFOUND. Jika ada, kirim FOUND → kirim 8 byte ukuran → kirim isi file dalam loop chunk.
 
 Kelebihan dan Keterbatasan
 
@@ -98,7 +98,7 @@ Fungsi-fungsi Utama:
 
 Kelebihan dan Keterbatasan
 
-Kelebihan utamanya adalah mampu **melayani banyak klien sekaligus** tanpa overhead thread. Ini juga yang membuat **broadcast pesan** bisa bekerja — server-sync tidak bisa melakukan broadcast karena tidak pernah punya lebih dari satu klien aktif. Keterbatasannya: kode lebih kompleks karena state harus dikelola secara eksplisit, dan operasi yang lama (seperti upload file besar) akan tetap memblokir server selama data diproses karena semuanya single-thread.
+Kelebihan utamanya adalah mampu melayani banyak klien sekaligus tanpa overhead thread. Ini juga yang membuat broadcast pesan bisa bekerja. Server-sync tidak bisa melakukan broadcast karena tidak pernah punya lebih dari satu klien aktif. Keterbatasannya: kode lebih kompleks karena state harus dikelola secara eksplisit, dan operasi yang lama (seperti upload file besar) akan tetap memblokir server selama data diproses karena semuanya single-thread.
 
 ## Screenshot Hasil
 ---
