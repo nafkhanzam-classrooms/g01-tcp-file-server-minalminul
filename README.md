@@ -393,7 +393,7 @@ sock.recv(4096)
    Fungsi ini penting untuk mencegah data lama (misalnya sisa broadcast/chat) mengganggu komunikasi command seperti upload dan download.
 
 Kelebihan dan Keterbatasan
-Client ini fleksibel karena dapat digunakan untuk berbagai jenis server (sync, select, thread, poll). Selain itu, fitur upload dan download sudah dilengkapi dengan mekanisme pengiriman ukuran file sehingga lebih aman dan terstruktur. Namun, client ini fleksibel karena dapat digunakan untuk berbagai jenis server (sync, select, thread, poll). Selain itu, fitur upload dan download sudah dilengkapi dengan mekanisme pengiriman ukuran file sehingga lebih aman dan terstruktur.
+Client ini fleksibel karena dapat digunakan untuk berbagai jenis server (sync, select, thread, poll). Selain itu, fitur upload dan download sudah dilengkapi dengan mekanisme pengiriman ukuran file sehingga lebih aman dan terstruktur. Keterbatasannya adalah proses download yang menyimpan data di memori terlebih dahulu sehingga kurang optimal untuk file besar.
 
 ## Screenshot Hasil
 ---
