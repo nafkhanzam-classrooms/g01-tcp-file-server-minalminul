@@ -40,11 +40,9 @@ def handle_upload(conn, filename):
     """
     conn.sendall(b'READY')
 
-    # Terima ukuran file
     raw_size = conn.recv(8)
     file_size = int.from_bytes(raw_size, 'big')
 
-    # Terima isi file
     filepath = os.path.join(FILES_DIR, filename)
     received = 0
     with open(filepath, 'wb') as f:
@@ -76,10 +74,8 @@ def handle_download(conn, filename):
     conn.sendall(b'FOUND')
     file_size = os.path.getsize(filepath)
 
-    # Kirim ukuran file
     conn.sendall(file_size.to_bytes(8, 'big'))
 
-    # Kirim isi file
     sent = 0
     with open(filepath, 'rb') as f:
         while True:
@@ -109,7 +105,7 @@ def handle_client(conn, addr):
         while True:
             data = conn.recv(BUFFER)
             if not data:
-                break  # klien tutup koneksi
+                break  
 
             message = data.decode().strip()
             print(f'  [RECV] {addr} -> {message!r}')
@@ -148,7 +144,6 @@ def handle_client(conn, addr):
 
 def main():
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # Agar port bisa langsung dipakai ulang setelah server restart
     server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_sock.bind((HOST, PORT))
     server_sock.listen(5)
@@ -159,9 +154,8 @@ def main():
     try:
         while True:
             print('[*] Menunggu koneksi klien...')
-            conn, addr = server_sock.accept()  # BLOCKING 
+            conn, addr = server_sock.accept()  
             handle_client(conn, addr)   
-            # Setelah handle_client selesai, baru terima klien berikutnya
     except KeyboardInterrupt:
         print('\n[server-sync] Server dihentikan.')
     finally:
