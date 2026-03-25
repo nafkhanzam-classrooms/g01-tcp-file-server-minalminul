@@ -22,7 +22,7 @@ Cara Kerja:
 Server ini bekerja dengan model blocking, satu klien dalam satu waktu. Inti dari cara kerjanya ada di fungsi main():
 
 ```
-server_sock.accept()  → menunggu klien masuk (BLOCKING)
+server_sock.accept()   → menunggu klien masuk (BLOCKING)
 handle_client(conn)    → melayani klien sampai selesai (BLOCKING)
 server_sock.accept()   → baru kemudian menerima klien berikutnya
 ```
