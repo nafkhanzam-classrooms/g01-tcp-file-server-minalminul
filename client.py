@@ -42,20 +42,16 @@ def do_upload(sock, filepath: str):
     filename  = os.path.basename(filepath)
     file_size = os.path.getsize(filepath)
 
-    # Kirim perintah upload
     drain_socket(sock)
     send_command(sock, f'/upload {filename}')
 
-    # Tunggu READY dari server
     ack = sock.recv(16)
     if ack != b'READY':
         print(f'[ERROR] Server tidak siap: {ack}')
         return
 
-    # Kirim ukuran file (8 byte big-endian)
     sock.sendall(file_size.to_bytes(8, 'big'))
 
-    # Kirim isi file
     sent = 0
     with open(filepath, 'rb') as f:
         while True:
@@ -66,7 +62,6 @@ def do_upload(sock, filepath: str):
             sent += len(chunk)
             print(f'\r  Mengupload... {sent}/{file_size} bytes', end='', flush=True)
 
-    # Tunggu konfirmasi OK
     result = sock.recv(16)
     print(f'\n[UPLOAD] {filename} -> {"Berhasil" if result == b"OK" else "Gagal"}')
 
@@ -75,7 +70,6 @@ def do_download(sock, filename: str):
     drain_socket(sock)
     send_command(sock, f'/download {filename}')
 
-    # Terima status
     status = sock.recv(16)
 
     if status.startswith(b'NOTFOUND'):
@@ -86,17 +80,14 @@ def do_download(sock, filename: str):
         print(f'[ERROR] Respons tidak dikenal: {status}')
         return
 
-    # Status bisa "FOUND" + 8 byte ukuran + data awal (semua dalam satu recv)
     raw = status[len(b'FOUND'):]
 
-    # Kumpulkan data sampai dapat 8 byte ukuran
     while len(raw) < 8:
         raw += sock.recv(BUFFER)
 
     file_size = int.from_bytes(raw[:8], 'big')
     data      = raw[8:]  # sisa setelah 8 byte ukuran
 
-    # Terima sisa data
     while len(data) < file_size:
         chunk = sock.recv(min(BUFFER, file_size - len(data)))
         if not chunk:
@@ -104,7 +95,6 @@ def do_download(sock, filename: str):
         data += chunk
         print(f'\r  Mengunduh... {len(data)}/{file_size} bytes', end='', flush=True)
 
-    # Simpan file
     save_path = "download_" + filename
     with open(save_path, 'wb') as f:
         f.write(data)
@@ -131,7 +121,6 @@ def main():
         print(f'[ERROR] Tidak bisa terhubung ke {host}:{port}. Pastikan server sudah berjalan.')
         return
 
-    # Tampilkan pesan sambutan dari server
     welcome = sock.recv(BUFFER).decode()
     print(welcome.strip())
 
