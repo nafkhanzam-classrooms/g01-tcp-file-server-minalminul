@@ -49,7 +49,7 @@ Kelebihan server ini adalah kodenya sangat sederhana dan mudah di-debug karena t
 
 Cara Kerja:
 
-Server ini menggunakan `select.select()` untuk memonitor banyak socket sekaligus dalam satu thread. Teknik ini disebut I/O multiplexing. Ide dasarnya: daripada memblokir di satu `recv()`, tanya ke OS "socket mana yang sudah punya data siap dibaca?" lalu proses satu per satu.
+Server ini menggunakan `select.select()` untuk memonitor banyak socket sekaligus dalam satu thread. Teknik ini disebut I/O multiplexing. 
 
 
 ```
@@ -64,7 +64,7 @@ for sock in readable:
 
 Semua ini terjadi dalam satu thread, satu proses. Tidak ada `threading.Thread` sama sekali.
 
-Server-select tidak bisa menyimpan state di stack fungsi (karena tidak ada thread per klien). Jika klien sedang di tengah-tengah upload file dan select() dipanggil lagi, server harus tahu bahwa klien itu sedang dalam mode upload — bukan mode perintah biasa. Solusinya adalah dictionary client_state yang menyimpan state setiap koneksi:
+Server-select tidak bisa menyimpan state di stack fungsi (karena tidak ada thread per klien). Jika klien sedang di tengah-tengah upload file dan select() dipanggil lagi, server harus tahu bahwa klien itu sedang dalam mode upload. Solusinya adalah dictionary client_state yang menyimpan state setiap koneksi:
 
 ```
 pythonclient_state[conn] = {
@@ -97,7 +97,8 @@ Fungsi-fungsi Utama:
 
 Kelebihan dan Keterbatasan
 
-Kelebihan utamanya adalah mampu melayani banyak klien sekaligus tanpa overhead thread. Ini juga yang membuat broadcast pesan bisa bekerja. Server-sync tidak bisa melakukan broadcast karena tidak pernah punya lebih dari satu klien aktif. Keterbatasannya: kode lebih kompleks karena state harus dikelola secara eksplisit, dan operasi yang lama (seperti upload file besar) akan tetap memblokir server selama data diproses karena semuanya single-thread.
+Kelebihan utamanya adalah mampu melayani banyak klien sekaligus tanpa overhead thread dan membuat broadcast pesan bisa bekerja. Keterbatasannya adalah kode lebih kompleks karena state harus dikelola secara eksplisit, dan operasi yang lama (seperti upload file besar) akan tetap memblokir server selama data diproses karena semuanya single-thread.
+
 
 **Server-thread.py — Server using the threading**
 
