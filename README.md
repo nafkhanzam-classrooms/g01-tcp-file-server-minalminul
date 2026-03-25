@@ -120,7 +120,7 @@ Cara Kerja Progaram:
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
 server.listen(5)
-  ```
+```
 - Penerimaan Client
 
 ```
@@ -148,7 +148,7 @@ self.conn.sendall(response.encode())
 
 - Perintah `/upload`
 
-  Server menerima file dari client dengan langkah sebagai berikut, server mengirimkan READY -> client mengirim ukuran file (8 byte) -> client mengirim isi file -> server menyimpan file dan mengirim OK.
+  Server menerima file dari client dengan langkah sebagai berikut, server mengirimkan `READY` -> client mengirim ukuran file (8 byte) -> client mengirim isi file -> server menyimpan file dan mengirim `OK`.
 ```
 self.conn.sendall(b'READY')
 file_size = int.from_bytes(self.conn.recv(8), 'big')
@@ -156,7 +156,7 @@ file_size = int.from_bytes(self.conn.recv(8), 'big')
 
 - Perintah `/download`
 
-  Server mengirim file ke client dengan langkah, jika file tidak ada (kirim NOTFOUND) -> jika ada (kirim FOUND) -> kirim ukuran file -> kirim isi file.
+  Server mengirim file ke client dengan langkah, jika file tidak ada (kirim `NOTFOUND`) -> jika ada (kirim `FOUND`) -> kirim ukuran file -> kirim isi file.
 ```
 self.conn.sendall(b'FOUND')
 self.conn.sendall(file_size.to_bytes(8, 'big'))
@@ -210,19 +210,19 @@ server.bind((HOST, PORT))
 server.listen(5)
 server.setblocking(False)
 ```
-Server kemudian didaftarkan ke objek `poll` untuk memantau event masuk.
+  Server kemudian didaftarkan ke objek `poll` untuk memantau event masuk.
 ```
 poller = select.poll()
 poller.register(server.fileno(), select.POLLIN)
 ```
 - Struktur Data Pendukung
   
-  server menggunakan beberapa struktur data:
+  Server menggunakan beberapa struktur data:
 ```
 fd_map → memetakan file descriptor ke socket
 clients → menyimpan daftar client yang terhubung
 ```
-Struktur ini penting untuk mengelola banyak koneksi dalam satu loop.
+  Struktur ini penting untuk mengelola banyak koneksi dalam satu loop.
 
 - Loop Utama (Polling)
 
@@ -230,7 +230,7 @@ Struktur ini penting untuk mengelola banyak koneksi dalam satu loop.
 ```
 events = poller.poll()
 ```
-Setiap event menunjukkan socket mana yang siap dibaca atau mengalami error.
+  Setiap event menunjukkan socket mana yang siap dibaca atau mengalami error.
 
 - Penerimaan Client
 
@@ -239,7 +239,7 @@ Setiap event menunjukkan socket mana yang siap dibaca atau mengalami error.
 conn, addr = server.accept()
 conn.setblocking(True)
 ```
-Client kemudian didaftarkan ke `poller` dan disimpan dalam `fd_map` serta `clients`.
+  Client kemudian didaftarkan ke `poller` dan disimpan dalam `fd_map` serta `clients`.
 
 - Penanganan Data Client
 
@@ -247,7 +247,7 @@ Client kemudian didaftarkan ke `poller` dan disimpan dalam `fd_map` serta `clien
 ```
 data = sock.recv(BUFFER)
 ```
-Data kemudian diproses sebagai perintah yang dikirimkan client.
+  Data kemudian diproses sebagai perintah yang dikirimkan client.
 
 - Perintah `/list`
 
