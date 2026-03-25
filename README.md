@@ -303,7 +303,104 @@ Kelebihan dan Keterbatasan
 
 Server poll lebih efisien dibandingkan multithreading karena tidak membuat thread baru untuk setiap client. Penggunaan resource lebih hemat dan cocok untuk menangani banyak koneksi sekaligus dalam satu proses. Namun, Server poll lebih efisien dibandingkan multithreading karena tidak membuat thread baru untuk setiap client. Penggunaan resource lebih hemat dan cocok untuk menangani banyak koneksi sekaligus dalam satu proses.
 
+**Client.py**
+
+Program ini merupakan client berbasis terminal yang digunakan untuk berkomunikasi dengan server menggunakan protokol TCP. Client ini dapat terhubung ke berbagai jenis server seperti server synchronous, select, thread, maupun poll.
+
+Client menyediakan beberapa fitur utama, yaitu:
+
+- Melihat daftar file di server (/list)
+- Upload file ke server (/upload)
+- Download file dari server (/download)
+- Mengirim pesan teks (chat)
+- Keluar dari program (exit)
+
+Cara Kerja Program:
+- Inisialisasi Client
+
+  Client membuat socket dan melakukan koneksi ke server berdasarkan host dan port yang diberikan melalui command line.
+```
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.connect((host, port))
+```
+   Jika koneksi berhasil, client akan menerima pesan sambutan dari server.
+
+- Input Perintah User
+
+  Client membaca input dari user secara terus-menerus menggunakan loop.
+```
+cmd = input('>> ').strip()
+```
+   Perintah yang dimasukkan akan diproses sesuai jenisnya, seperti `/list`, `/upload`, `/download`, atau pesan biasa.
+
+Fungsi-Fungsi Program:
+
+- Fungsi `main()`
+
+  Fungsi utama yang menjalankan program client. Fungsi ini bertugas untuk:
+  - Mengatur alamat server (host dan port)
+  - Membuat koneksi ke server
+  - Menjalankan loop input user
+  - Mengarahkan perintah ke fungsi yang sesuai
+    
+- Fungsi `send_command()`
+
+  Fungsi ini digunakan untuk mengirim perintah dari client ke server dalam bentuk string yang sudah di-encode menjadi bytes.
+```
+sock.sendall(command.encode())
+c. Fungsi do_list()
+```
+   Fungsi ini digunakan untuk meminta daftar file dari server.
+
+   Alurnya:
+   - Membersihkan buffer dengan `drain_socket()`
+   - Mengirim perintah `/list`
+   - Menerima respon dari server
+   - Menampilkan daftar file
+
+- Fungsi `do_upload()`
+
+  Fungsi ini digunakan untuk mengirim file dari client ke server.
+
+  Alurnya:
+  - Mengecek apakah file ada di lokal
+  - Mengirim perintah `/upload`
+  - Menunggu respon `READY` dari server
+  - Mengirim ukuran file (8 byte)
+  - Mengirim isi file secara bertahap
+  - Menampilkan progress upload
+  - Menerima respon `OK` dari server
+```
+sock.sendall(file_size.to_bytes(8, 'big'))
+```
+- Fungsi `do_download()`
+  
+  Fungsi ini digunakan untuk mengunduh file dari server.
+
+  Alurnya:
+  - Mengirim perintah `/download`
+  - Menerima status (`FOUND` atau `NOTFOUND`)
+  - Jika file ada: Menerima ukuran file, Menerima isi file, dan Menyimpan file dengan nama `download_<filename>`
+
+- Fungsi `drain_socket()`
+
+  Fungsi ini digunakan untuk membersihkan buffer socket sebelum mengirim perintah baru.
+```
+sock.settimeout(0.1)
+sock.recv(4096)
+```
+   Fungsi ini penting untuk mencegah data lama (misalnya sisa broadcast/chat) mengganggu komunikasi command seperti upload dan download.
+
+Kelebihan dan Keterbatasan
+Client ini fleksibel karena dapat digunakan untuk berbagai jenis server (sync, select, thread, poll). Selain itu, fitur upload dan download sudah dilengkapi dengan mekanisme pengiriman ukuran file sehingga lebih aman dan terstruktur. Namun, client ini fleksibel karena dapat digunakan untuk berbagai jenis server (sync, select, thread, poll). Selain itu, fitur upload dan download sudah dilengkapi dengan mekanisme pengiriman ukuran file sehingga lebih aman dan terstruktur.
+
 ## Screenshot Hasil
 ---
-*Server_Thread*
+*Server-Thread.py-Server using the threading*
+<img width="1027" height="548" alt="Screenshot 2026-03-25 174838" src="https://github.com/user-attachments/assets/e2ffbf2f-0c52-4f3f-802c-8ee2f26f07c6" />
+<img width="169" height="116" alt="Screenshot 2026-03-25 174912" src="https://github.com/user-attachments/assets/1c20361f-ffa6-487a-9020-4a7fd7a7ad3e" />
+
+*Server-Poll.py-Server using poll syscall*
+<img width="1024" height="525" alt="Screenshot 2026-03-25 175114" src="https://github.com/user-attachments/assets/301241c4-d5c0-4212-a483-585dd83464b8" />
+<img width="169" height="116" alt="Screenshot 2026-03-25 174912" src="https://github.com/user-attachments/assets/96913f06-1238-4c8e-b86e-a96d4baa7c77" />
 
