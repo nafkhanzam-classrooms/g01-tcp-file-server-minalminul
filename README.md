@@ -1,4 +1,4 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/mRmkZGKe)
+<img width="1140" height="300" alt="image" src="https://github.com/user-attachments/assets/1dde2e86-1b2e-449f-b6b0-6064a9a9192a" />[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/mRmkZGKe)
 # Network Programming - Assignment G01
 
 ## Anggota Kelompok
@@ -399,7 +399,14 @@ Client ini fleksibel karena dapat digunakan untuk berbagai jenis server (sync, s
 ---
 
 **Server-sync.py**
+
 <img width="1710" height="567" alt="image" src="https://github.com/user-attachments/assets/33799791-45cf-49ab-a200-4d7bf906d8ed" />
+<img width="1140" height="300" alt="image" src="https://github.com/user-attachments/assets/4b56997c-f7f9-45c0-ba3c-a0dbed3962f4" />
+
+**server-select.py — Server dengan I/O Multiplexing**
+
+<img width="1693" height="571" alt="image" src="https://github.com/user-attachments/assets/907dbccb-1a5b-4172-ab33-9e9d29ca3979" />
+<img width="1146" height="416" alt="image" src="https://github.com/user-attachments/assets/fee22b1d-7900-406a-b897-eff87baca7bf" />
 
 *Server-Thread.py-Server using the threading*
 <img width="1027" height="548" alt="Screenshot 2026-03-25 174838" src="https://github.com/user-attachments/assets/e2ffbf2f-0c52-4f3f-802c-8ee2f26f07c6" />
