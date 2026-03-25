@@ -100,6 +100,209 @@ Kelebihan dan Keterbatasan
 
 Kelebihan utamanya adalah mampu melayani banyak klien sekaligus tanpa overhead thread. Ini juga yang membuat broadcast pesan bisa bekerja. Server-sync tidak bisa melakukan broadcast karena tidak pernah punya lebih dari satu klien aktif. Keterbatasannya: kode lebih kompleks karena state harus dikelola secara eksplisit, dan operasi yang lama (seperti upload file besar) akan tetap memblokir server selama data diproses karena semuanya single-thread.
 
+**Server-thread.py — Server using the threading**
+
+Program ini merupakan server berbasis multithreading yang menggunakan modul socket dan threading pada Python. Server bekerja menggunakan protokol TCP dan mampu menangani lebih dari satu client secara bersamaan, di mana setiap client akan dilayani oleh satu thread terpisah.
+
+Server menyediakan beberapa fitur utama, yaitu:
+
+- Melihat daftar file (/list)
+- Upload file (/upload)
+- Download file (/download)
+- Chat antar client (broadcast)
+
+Cara Kerja Progaram:
+
+- Inisialisasi Server
+  
+  Server dibuat menggunakan TCP socket dengan melakukan binding ke alamat dan port tertentu, kemudian masuk ke mode listening untuk menunggu koneksi dari client.
+```
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((HOST, PORT))
+server.listen(5)
+  ```
+- Penerimaan Client
+
+```
+conn, addr = server.accept()
+t = ClientThread(conn, addr)
+t.start()
+```
+  Setiap client akan ditangani oleh objek `ClientThread`, kemudian thread dijalankan menggunakan method `.start()` sehingga berjalan secara paralel.
+
+- Penanganan Client (Thread)
+
+  Setiap thread akan menjalankan method `run()` untuk menangani komunikasi dengan client.
+```
+while True:
+    data = self.conn.recv(BUFFER)
+```
+
+- Perintah `/list`
+
+  Server akan membaca isi folder penyimpanan file `(server_files)` dan mengirimkan daftar file ke client.
+```
+files = os.listdir(FILES_DIR)
+self.conn.sendall(response.encode())
+```
+
+- Perintah `/upload`
+
+  Server menerima file dari client dengan langkah sebagai berikut, server mengirimkan READY -> client mengirim ukuran file (8 byte) -> client mengirim isi file -> server menyimpan file dan mengirim OK.
+```
+self.conn.sendall(b'READY')
+file_size = int.from_bytes(self.conn.recv(8), 'big')
+```
+
+- Perintah `/download`
+
+  Server mengirim file ke client dengan langkah, jika file tidak ada (kirim NOTFOUND) -> jika ada (kirim FOUND) -> kirim ukuran file -> kirim isi file.
+```
+self.conn.sendall(b'FOUND')
+self.conn.sendall(file_size.to_bytes(8, 'big'))
+```
+
+- Chat / Broadcast
+
+  Jika client mengirim pesan biasa, server akan mengirim pesan tersebut ke semua client lain.
+```
+for c in clients:
+    if c != self.conn:
+        c.sendall(broadcast_msg)
+```
+Fungsi-Fungsi Program
+- Fungsi `main()`
+
+   Fungsi `main()` merupakan titik awal program server. Fungsi ini bertugas untuk membuat socket server, melakukan binding ke alamat dan port, serta menjalankan loop utama untuk menerima koneksi dari client. Setiap koneksi yang masuk akan dibuatkan thread baru agar dapat ditangani secara paralel.
+
+- Kelas `ClientThread`
+
+  Kelas ini merupakan turunan dari threading.Thread yang digunakan untuk menangani satu client. Setiap object dari kelas ini akan berjalan sebagai thread terpisah.
+
+- Fungsi `run()`
+
+   Method `run()` adalah fungsi utama yang dijalankan oleh setiap thread. Fungsi ini bertugas menerima data dari client, mengolah perintah, dan mengirimkan respon kembali ke client. Seluruh fitur seperti `/list`, `/upload`, `/download`, dan chat diproses di dalam fungsi ini.
+
+- Fungsi Broadcast
+
+   Fungsi broadcast dilakukan di dalam blok `else`, yaitu ketika pesan yang diterima bukan merupakan perintah. Server akan mengirim pesan tersebut ke semua client lain yang terhubung.
+```
+for c in clients:
+    if c != self.conn:
+        c.sendall(broadcast_msg)
+```
+
+Kelebihan dan Keterbatasan
+
+Server ini mampu menangani banyak client secara bersamaan karena menggunakan thread terpisah untuk setiap client. Respon yang diberikan relatif cepat dan implementasinya cukup sederhana sehingga mudah dipahami dan dikembangkan. Namun, penggunaan thread untuk setiap client menyebabkan konsumsi memori dan CPU meningkat seiring bertambahnya jumlah client. Selain itu, penggunaan variabel global seperti clients berpotensi menimbulkan masalah sinkronisasi jika tidak dikelola dengan baik.
+
+**Server-poll.py-Server using poll syscall**
+
+Program ini merupakan server berbasis I/O multiplexing menggunakan modul `socket` dan `select` (khususnya `poll`) pada Python. Berbeda dengan server thread, server ini tidak menggunakan banyak thread, melainkan satu proses utama yang dapat menangani banyak client secara bersamaan dengan memantau aktivitas socket.
+
+Cara Kerja Program:
+- Inisialisasi Server
+  
+  Server dibuat menggunakan TCP socket, kemudian diatur menjadi non-blocking agar dapat digunakan dengan mekanisme `poll`.
+```
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((HOST, PORT))
+server.listen(5)
+server.setblocking(False)
+```
+Server kemudian didaftarkan ke objek `poll` untuk memantau event masuk.
+```
+poller = select.poll()
+poller.register(server.fileno(), select.POLLIN)
+```
+- Struktur Data Pendukung
+  
+  server menggunakan beberapa struktur data:
+```
+fd_map → memetakan file descriptor ke socket
+clients → menyimpan daftar client yang terhubung
+```
+Struktur ini penting untuk mengelola banyak koneksi dalam satu loop.
+
+- Loop Utama (Polling)
+
+  Server berjalan dalam loop utama yang terus memantau event menggunakan `poll()`.
+```
+events = poller.poll()
+```
+Setiap event menunjukkan socket mana yang siap dibaca atau mengalami error.
+
+- Penerimaan Client
+
+  Jika event berasal dari socket server, berarti ada client baru yang terhubung.
+```
+conn, addr = server.accept()
+conn.setblocking(True)
+```
+Client kemudian didaftarkan ke `poller` dan disimpan dalam `fd_map` serta `clients`.
+
+- Penanganan Data Client
+
+  Jika event berasal dari client, server akan membaca data menggunakan `recv()`.
+```
+data = sock.recv(BUFFER)
+```
+Data kemudian diproses sebagai perintah yang dikirimkan client.
+
+- Perintah `/list`
+
+  Server membaca isi folder `server_files` dan mengirimkan daftar file ke client.
+```
+files = os.listdir(FILES_DIR)
+```
+- Perintah `/upload`
+
+  Server menerima file dari client dengan langkah, kirim `READY` -> terima ukuran file (8 byte) -> terima isi file -> simpan file dan kirim `OK`
+```
+file_size = int.from_bytes(raw_size, 'big')
+```
+- Perintah `/download`
+
+  Server mengirim file ke client dengan langkah, jika file tidak ada (NOTFOUND) -> jika ada (FOUND) -> kirim ukuran file -> kirim isi file
+  
+- Chat / Broadcast
+
+  Pesan biasa akan dikirim ke semua client lain.
+```
+for c in clients:
+    if c != sock:
+        c.sendall(broadcast_msg)
+```
+- Penanganan Disconnect
+
+  Jika terjadi error atau client terputus, server akan unregister dari `poll` -> menutup socket -> menghapus dari `fd_map` dan `clients`
+```
+poller.unregister(fd)
+sock.close()
+del fd_map[fd]
+```
+Fungsi-Fungsi Program
+
+- Fungsi `poll()`
+
+  Fungsi `poll()` digunakan untuk memantau banyak socket sekaligus dalam satu thread. Server hanya akan membaca socket yang siap, sehingga lebih efisien dibandingkan membuat thread untuk setiap client.
+
+- Fungsi Mapping `fd_map`
+
+  Karena `poll()` bekerja dengan file descriptor, maka digunakan dictionary `fd_map` untuk menghubungkan descriptor dengan objek socket.
+
+- Fungsi Penanganan Event
+
+  Setiap event dicek apakah termasuk:
+```
+POLLIN → ada data masuk
+POLLERR / POLLHUP → error atau disconnect
+```
+
+Kelebihan dan Keterbatasan
+
+Server poll lebih efisien dibandingkan multithreading karena tidak membuat thread baru untuk setiap client. Penggunaan resource lebih hemat dan cocok untuk menangani banyak koneksi sekaligus dalam satu proses. Namun, Server poll lebih efisien dibandingkan multithreading karena tidak membuat thread baru untuk setiap client. Penggunaan resource lebih hemat dan cocok untuk menangani banyak koneksi sekaligus dalam satu proses.
+
 ## Screenshot Hasil
 ---
 *Server_Thread*
