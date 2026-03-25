@@ -9,11 +9,9 @@ FILES_DIR = 'server_files'
 
 os.makedirs(FILES_DIR, exist_ok=True)
 
-# mapping fd -> socket
 fd_map = {}
 clients = []
 
-# ===== SETUP SERVER =====
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server.bind((HOST, PORT))
@@ -27,17 +25,15 @@ fd_map[server.fileno()] = server
 
 print(f'[POLL SERVER] Running on {HOST}:{PORT}')
 
-# ===== MAIN LOOP =====
 while True:
     events = poller.poll()
 
     for fd, event in events:
         sock = fd_map[fd]
 
-        # ===== NEW CONNECTION =====
         if sock is server:
             conn, addr = server.accept()
-            conn.setblocking(True)  # 🔥 penting biar upload/download aman
+            conn.setblocking(True)  
 
             fd_map[conn.fileno()] = conn
             poller.register(conn.fileno(), select.POLLIN)
@@ -47,7 +43,6 @@ while True:
             print(f'[+] Client connected: {addr}')
             conn.sendall(b'Selamat datang!\n')
 
-        # ===== CLIENT DATA =====
         elif event & select.POLLIN:
             try:
                 data = sock.recv(BUFFER)
@@ -59,13 +54,11 @@ while True:
 
                 print(f'[RECV] {addr} -> {msg!r}')
 
-                # ===== LIST =====
                 if msg.startswith('/list'):
                     files = os.listdir(FILES_DIR)
                     response = '\n'.join(files) if files else '(tidak ada file)'
                     sock.sendall(response.encode())
 
-                # ===== UPLOAD =====
                 elif msg.startswith('/upload '):
                     filename = msg.split()[1]
                     filepath = os.path.join(FILES_DIR, filename)
@@ -79,7 +72,6 @@ while True:
 
                     file_size = int.from_bytes(raw_size, 'big')
 
-                    # terima file
                     received = 0
                     with open(filepath, 'wb') as f:
                         while received < file_size:
@@ -92,7 +84,6 @@ while True:
                     sock.sendall(b'OK')
                     print(f'[UPLOAD] {filename} ({received} bytes)')
 
-                # ===== DOWNLOAD =====
                 elif msg.startswith('/download '):
                     filename = msg.split()[1]
                     filepath = os.path.join(FILES_DIR, filename)
@@ -112,7 +103,6 @@ while True:
                                     break
                                 sock.sendall(chunk)
 
-                # ===== CHAT =====
                 else:
                     broadcast_msg = f'[{addr[0]}:{addr[1]}] {msg}\n'.encode()
 
@@ -128,7 +118,6 @@ while True:
                     sock.sendall(f'[Server] pesan dikirim ke {count} klien lain.\n'.encode())
 
             except:
-                # ===== DISCONNECT =====
                 addr = sock.getpeername()
                 print(f'[-] Client disconnected: {addr}')
 
@@ -137,7 +126,6 @@ while True:
                 clients.remove(sock)
                 del fd_map[fd]
 
-        # ===== ERROR =====
         if event & (select.POLLERR | select.POLLHUP):
             poller.unregister(fd)
             sock.close()
