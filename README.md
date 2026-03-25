@@ -348,8 +348,9 @@ Fungsi-Fungsi Program:
   Fungsi ini digunakan untuk mengirim perintah dari client ke server dalam bentuk string yang sudah di-encode menjadi bytes.
 ```
 sock.sendall(command.encode())
-c. Fungsi do_list()
 ```
+- Fungsi do_list()
+
    Fungsi ini digunakan untuk meminta daftar file dari server.
 
    Alurnya:
