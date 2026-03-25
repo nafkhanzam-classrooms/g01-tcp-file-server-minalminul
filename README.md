@@ -301,7 +301,7 @@ POLLERR / POLLHUP → error atau disconnect
 
 Kelebihan dan Keterbatasan
 
-Server poll lebih efisien dibandingkan multithreading karena tidak membuat thread baru untuk setiap client. Penggunaan resource lebih hemat dan cocok untuk menangani banyak koneksi sekaligus dalam satu proses. Namun, Server poll lebih efisien dibandingkan multithreading karena tidak membuat thread baru untuk setiap client. Penggunaan resource lebih hemat dan cocok untuk menangani banyak koneksi sekaligus dalam satu proses.
+Server poll lebih efisien dibandingkan multithreading karena tidak membuat thread baru untuk setiap client. Penggunaan resource lebih hemat dan cocok untuk menangani banyak koneksi sekaligus dalam satu proses. Namun, implementasi server poll lebih kompleks karena harus mengelola event dan state secara manual. Selain itu, jika terjadi operasi blocking seperti upload atau download besar, server dapat terhambat karena berjalan dalam satu thread.
 
 **Client.py**
 
