@@ -397,6 +397,10 @@ Client ini fleksibel karena dapat digunakan untuk berbagai jenis server (sync, s
 
 ## Screenshot Hasil
 ---
+
+**Server-sync.py**
+<img width="1710" height="567" alt="image" src="https://github.com/user-attachments/assets/33799791-45cf-49ab-a200-4d7bf906d8ed" />
+
 *Server-Thread.py-Server using the threading*
 <img width="1027" height="548" alt="Screenshot 2026-03-25 174838" src="https://github.com/user-attachments/assets/e2ffbf2f-0c52-4f3f-802c-8ee2f26f07c6" />
 <img width="169" height="116" alt="Screenshot 2026-03-25 174912" src="https://github.com/user-attachments/assets/1c20361f-ffa6-487a-9020-4a7fd7a7ad3e" />
@@ -404,4 +408,7 @@ Client ini fleksibel karena dapat digunakan untuk berbagai jenis server (sync, s
 *Server-Poll.py-Server using poll syscall*
 <img width="1024" height="525" alt="Screenshot 2026-03-25 175114" src="https://github.com/user-attachments/assets/301241c4-d5c0-4212-a483-585dd83464b8" />
 <img width="169" height="116" alt="Screenshot 2026-03-25 174912" src="https://github.com/user-attachments/assets/96913f06-1238-4c8e-b86e-a96d4baa7c77" />
+
+
+
 
